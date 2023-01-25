@@ -6,8 +6,8 @@
 
 #include "GlobalNamespace/BeatmapEventTypeExtensions.hpp"
 #include "GlobalNamespace/IndexFilter.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
-
+#include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
+#include "BeatmapSaveDataVersion3/BeatmapSaveData_LightTranslationEventBoxGroup.hpp"
 #include "BeatmapSaveDataVersion2_6_0AndEarlier/BeatmapSaveData_SpecialEventsForKeyword.hpp"
 
 #include "cpp-semver/shared/cpp-semver.hpp"
@@ -55,10 +55,11 @@ void CustomBeatmapSaveData::ctor(
         ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::ColorBoostEventData *> *colorBoostBeatmapEvents,
         ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightColorEventBoxGroup *> *lightColorEventBoxGroups,
         ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightRotationEventBoxGroup *> *lightRotationEventBoxGroups,
+        ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightTranslationEventBoxGroup *>* lightTranslationEventBoxGroups,
         ::BeatmapSaveDataVersion3::BeatmapSaveData::BasicEventTypesWithKeywords *basicEventTypesWithKeywords,
         bool useNormalEventsAsCompatibleEvents) {
     INVOKE_CTOR();
-    static auto* ctor = il2cpp_utils::FindMethodUnsafe(classof(BeatmapSaveData*), ".ctor", 14);
+    static auto* ctor = il2cpp_utils::FindMethodUnsafe(classof(BeatmapSaveData*), ".ctor", 15);
     CRASH_UNLESS(il2cpp_utils::RunMethod(this, ctor, bpmEvents,
                                          rotationEvents,
                                          colorNotes,
@@ -71,6 +72,7 @@ void CustomBeatmapSaveData::ctor(
                                          colorBoostBeatmapEvents,
                                          lightColorEventBoxGroups,
                                          lightRotationEventBoxGroups,
+                                         lightTranslationEventBoxGroups,
                                          basicEventTypesWithKeywords,
                                          useNormalEventsAsCompatibleEvents));
 }
@@ -966,6 +968,7 @@ CustomJSONData::v3::CustomBeatmapSaveData::Deserialize(std::shared_ptr<rapidjson
     SAFEPTR_VLIST(BeatmapSaveData::ColorBoostEventData*, colorBoostBeatmapEvents);
     SAFEPTR_VLIST(BeatmapSaveData::LightColorEventBoxGroup*, lightColorEventBoxGroups);
     SAFEPTR_VLIST(BeatmapSaveData::LightRotationEventBoxGroup*, lightRotationEventBoxGroups);
+    SAFEPTR_VLIST(BeatmapSaveData::LightTranslationEventBoxGroup*, lightTranslationEventBoxGroups);
     SAFEPTR_VLIST(BasicEventTypesWithKeywords::BasicEventTypesForKeyword*, basicEventTypesForKeyword);
     bool useNormalEventsAsCompatibleEvents;
 
@@ -1074,6 +1077,15 @@ CustomJSONData::v3::CustomBeatmapSaveData::Deserialize(std::shared_ptr<rapidjson
                 lightRotationEventBoxGroups.push_back(DeserializeLightRotationEventBoxGroup(o));
             }
         }
+        IF_CHECK_HASH(lightTranslationEventBoxGroups) {
+            auto arr = it.value.GetArray();
+
+            lightTranslationEventBoxGroups.resize(arr.Size());
+
+            for (auto const &o: it.value.GetArray()) {
+                // lightTranslationEventBoxGroups.push_back(DeserializeLightRotationEventBoxGroup(o));
+            }
+        }
         IF_CHECK_HASH(basicEventTypesWithKeywords) {
 
             auto dIt = it.value.FindMember("d");
@@ -1122,6 +1134,7 @@ CustomJSONData::v3::CustomBeatmapSaveData::Deserialize(std::shared_ptr<rapidjson
             colorBoostBeatmapEvents.getInner(),
             lightColorEventBoxGroups.getInner(),
             lightRotationEventBoxGroups.getInner(),
+            lightTranslationEventBoxGroups.getInner(),
             BasicEventTypesWithKeywords::New_ctor(basicEventTypesForKeyword.getInner()),
             useNormalEventsAsCompatibleEvents);
 
@@ -1347,6 +1360,7 @@ CustomBeatmapSaveData *CustomBeatmapSaveData::Convert2_6_0(CustomJSONData::v2::C
                                                      *colorBoosts,
                                                      *VList<BeatmapSaveData::LightColorEventBoxGroup*>(),
                                                      *VList<BeatmapSaveData::LightRotationEventBoxGroup*>(),
+                                                     *VList<BeatmapSaveData::LightTranslationEventBoxGroup*>(),
                                                      basicEventTypesWithKeywords,
                                                      true);
 

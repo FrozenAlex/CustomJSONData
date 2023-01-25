@@ -3,13 +3,12 @@
 #include "songloader/shared/API.hpp"
 #include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
 #include "songloader/shared/CustomTypes/CustomLevelInfoSaveData.hpp"
-
+#include "beatsaber-hook/shared/utils/byref.hpp"
 #include "GlobalNamespace/ColorBoostBeatmapEventData.hpp"
 #include "GlobalNamespace/EnvironmentKeywords.hpp"
 #include "GlobalNamespace/BeatmapDataItem.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
+#include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
 #include "GlobalNamespace/ISortedList_1.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
 #include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/MultipleSortedListsEnumerator_1.hpp"
 #include "GlobalNamespace/BPMChangeBeatmapEventData.hpp"
@@ -370,25 +369,28 @@ MAKE_PAPER_HOOK_MATCH(BeatmapSaveData_DeserializeFromJSONString, &BeatmapSaveDat
         return nullptr;
     }
 }
-
-MAKE_HOOK_FIND_INSTANCE(CustomBeatmapDataSortedListForTypes_InsertItem, classof(BeatmapDataSortedListForTypes_1<BeatmapDataItem*>*), "InsertItem", void, BeatmapDataSortedListForTypes_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
-    auto list = self->GetList(CustomBeatmapData::GetCustomType(item));
+MAKE_HOOK_FIND_INSTANCE(BeatmapDataSortedListForTypeAndIds_InsertItem, classof(BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*), "InsertItem", void, BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
+    auto list = self->GetList(CustomBeatmapData::GetCustomType(item), item->subtypeIdentifier);
 
     list->Insert(item);
-    // fix method resolution
-//
-//    auto context = CJDLogger::GetLogger().WithContext("insert log");
-//
-//    il2cpp_utils::LogMethods(context, reinterpret_cast<Il2CppObject*>(list)->klass, true);
-//
-//    auto* ___internal__method = THROW_UNLESS((::il2cpp_utils::FindMethod(list, "Insert", std::vector<Il2CppClass*>{}, ::std::vector<const Il2CppType*>{&classof(BeatmapDataItem*)->byval_arg})));
-//    ::il2cpp_utils::RunMethodRethrow<::System::Collections::Generic::LinkedListNode_1<BeatmapDataItem>*, false>(list, ___internal__method, item);
+//     // fix method resolution
+// //
+// //    auto context = CJDLogger::GetLogger().WithContext("insert log");
+// //
+// //    il2cpp_utils::LogMethods(context, reinterpret_cast<Il2CppObject*>(list)->klass, true);
+// //
+// //    auto* ___internal__method = THROW_UNLESS((::il2cpp_utils::FindMethod(list, "Insert", std::vector<Il2CppClass*>{}, ::std::vector<const Il2CppType*>{&classof(BeatmapDataItem*)->byval_arg})));
+// //    ::il2cpp_utils::RunMethodRethrow<::System::Collections::Generic::LinkedListNode_1<BeatmapDataItem>*, false>(list, ___internal__method, item);
 }
 
-MAKE_HOOK_FIND_INSTANCE(CustomBeatmapDataSortedListForTypes_RemoveItem, classof(BeatmapDataSortedListForTypes_1<BeatmapDataItem*>*), "RemoveItem", void, BeatmapDataSortedListForTypes_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
-    auto list = self->GetList(CustomBeatmapData::GetCustomType(item));
-    auto node = list->NodeForItem(item);
-    list->Remove(node);
+MAKE_HOOK_FIND_INSTANCE(BeatmapDataSortedListForTypeAndIds_RemoveItem, classof(BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*), "RemoveItem", void, BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
+    auto list = self->GetList(CustomBeatmapData::GetCustomType(item), item->subtypeIdentifier);
+    // auto node = list->NodeForItem(item);
+    auto hasNode = self->itemToNodeMap->ContainsKey(item);
+    if (hasNode) {
+        auto node = self->itemToNodeMap->get_Item(item);
+        list->Remove(node);
+    }
 }
 
 BeatmapCallbacksController* beatmapCallbacksController;
@@ -579,6 +581,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     // TODO: Remove converter
     CppConverter<BeatmapObjectData*, BeatmapSaveData::BeatmapSaveDataItem*> objectConverter;
     objectConverter.AddConverter<v3::CustomBeatmapSaveData_ColorNoteData*>([&BeatToTime](v3::CustomBeatmapSaveData_ColorNoteData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("ColorNoteData");
         auto noteData = CreateCustomBasicNoteData(
                 BeatToTime(data->b),
                 data->get_line(),
@@ -592,6 +595,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     });
 
     objectConverter.AddConverter<v3::CustomBeatmapSaveData_BombNoteData*>([&BeatToTime](v3::CustomBeatmapSaveData_BombNoteData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("BombNoteData");
         auto b = CreateCustomBombNoteData(
             BeatToTime(data->b),
             data->get_line(),
@@ -601,6 +605,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     });
 
     objectConverter.AddConverter<v3::CustomBeatmapSaveData_ObstacleData*>([&BeatToTime](v3::CustomBeatmapSaveData_ObstacleData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("ObstacleData");
         float beat = BeatToTime(data->b);
         auto obstacle = CustomObstacleData::New_ctor(
                 beat,
@@ -616,6 +621,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     });
 
     objectConverter.AddConverter<v3::CustomBeatmapSaveData_SliderData*>([&BeatToTime](v3::CustomBeatmapSaveData_SliderData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("SliderData");
         return CustomSliderData_CreateCustomSliderData(
                 ConvertColorType(data->get_colorType()),
                 BeatToTime(data->b),
@@ -636,6 +642,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     });
 
     objectConverter.AddConverter<v3::CustomBeatmapSaveData_BurstSliderData*>([&BeatToTime](v3::CustomBeatmapSaveData_BurstSliderData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("BurstSliderData");
         return CustomSliderData_CreateCustomBurstSliderData(
                 ConvertColorType(data->get_colorType()),
                 BeatToTime(data->b),
@@ -655,6 +662,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     });
 
     objectConverter.AddConverter<BeatmapSaveData::WaypointData*>([&BeatToTime](BeatmapSaveData::WaypointData* data) constexpr {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("WaypointData");
         return CustomJSONData::NewFast<WaypointData*>(BeatToTime(data->b),
                                       data->get_line(),
                                       ConvertNoteLineLayer(data->get_layer()),
@@ -713,16 +721,22 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     addAllToVector(beatmapDataObjectItems, beatmapSaveData->waypoints);
 
     profile.mark("Grouped all beatmap objects size {}", beatmapDataObjectItems.size());
-
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("Grouped all beatmap objects size {}", beatmapDataObjectItems.size());
+    
     CJDLogger::Logger.fmtLog<LogLevel::DBG>("Cleaning and sorting beatmap objects");
     cleanAndSort(beatmapDataObjectItems);
     for (auto const& o : beatmapDataObjectItems) {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("Before process");
         auto* beatmapObjectData = objectConverter.ProcessItem(o);
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("After process");
         if (beatmapObjectData != nullptr) {
+            CJDLogger::Logger.fmtLog<LogLevel::DBG>("Data is not null");
             beatmapData->AddBeatmapObjectData(beatmapObjectData);
+        } else {
+            CJDLogger::Logger.fmtLog<LogLevel::DBG>("Data is null");
         }
     }
-
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("End");
     profile.mark("Processed and added beatmap objects");
     bpmTimeProcessor.Reset();
 
@@ -745,6 +759,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
 
     // only for v3 maps
     if (flag3) {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("V3 map");
         auto specialEventsFilter = BeatmapDataLoader::SpecialEventsFilter::New_ctor(beatmapSaveData->basicEventTypesWithKeywords, environmentKeywords);
 
         eventConverter.AddConverter<v3::CustomBeatmapSaveData_BasicEventData*>([&BeatToTime, &specialEventsFilter](v3::CustomBeatmapSaveData_BasicEventData* data) constexpr {
@@ -771,6 +786,7 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
                     data->get_boost());
         });
     } else {
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("V2 map");
         eventConverter.AddConverter<v3::CustomBeatmapSaveData_BasicEventData*>([](v3::CustomBeatmapSaveData_BasicEventData* data) constexpr {
             return nullptr;
         });
@@ -797,19 +813,22 @@ MAKE_PAPER_HOOK_MATCH(GetBeatmapDataFromBeatmapSaveData, &BeatmapDataLoader::Get
     addAllToVector(beatmapDataEventItems, beatmapSaveData->colorBoostBeatmapEvents);
     CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events");
     addAllToVector(beatmapDataEventItems, beatmapSaveData->rotationEvents);
-
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events end");
     profile.mark("Grouped beatmap events");
-
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events end");
     cleanAndSort(beatmapDataEventItems);
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events end");
     for (auto const& o : beatmapDataEventItems) {
         auto* beatmapEventData = eventConverter.ProcessItem(o);
-
+        CJDLogger::Logger.fmtLog<LogLevel::DBG>("2");
         if (beatmapEventData != nullptr) {
+            CJDLogger::Logger.fmtLog<LogLevel::DBG>("3");
             beatmapData->InsertBeatmapEventData(beatmapEventData);
         }
     }
+    CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events end");
 
-    CJDLogger::Logger.fmtLog<LogLevel::INF>("Beatmap events {}", beatmapData->beatmapDataItemsPerType->items->get_Item(csTypeOf(BasicBeatmapEventData*))->get_items()->get_Count());
+    CJDLogger::Logger.fmtLog<LogLevel::INF>("Beatmap events {}", beatmapData->beatmapDataItemsPerTypeAndId->items->get_Item(csTypeOf(BasicBeatmapEventData*))->get_items()->get_Count());
 
     profile.mark("Processed and added beatmap events");
 
@@ -943,8 +962,8 @@ void CustomJSONData::InstallHooks() {
     INSTALL_HOOK_ORIG(logger, BeatmapSaveData_ConvertBeatmapSaveData)
     INSTALL_HOOK_ORIG(logger, BeatmapSaveData_DeserializeFromJSONString)
     INSTALL_HOOK_ORIG(logger, GetBeatmapDataFromBeatmapSaveData)
-    INSTALL_HOOK_ORIG(logger, CustomBeatmapDataSortedListForTypes_InsertItem);
-    INSTALL_HOOK_ORIG(logger, CustomBeatmapDataSortedListForTypes_RemoveItem);
+    INSTALL_HOOK_ORIG(logger, BeatmapDataSortedListForTypeAndIds_InsertItem);
+    INSTALL_HOOK_ORIG(logger, BeatmapDataSortedListForTypeAndIds_RemoveItem);
     INSTALL_HOOK_ORIG(logger, BeatmapData_GetFilteredCopy);
     INSTALL_HOOK_ORIG(logger, BeatmapData_GetCopy);
     INSTALL_HOOK_ORIG(logger, BeatmapDataStrobeFilterTransform_CreateTransformedData);

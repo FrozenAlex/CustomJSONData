@@ -3,9 +3,8 @@
 #include "GlobalNamespace/ColorBoostBeatmapEventData.hpp"
 #include "GlobalNamespace/EnvironmentKeywords.hpp"
 #include "GlobalNamespace/BeatmapDataItem.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
+#include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
 #include "GlobalNamespace/ISortedList_1.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
 #include "GlobalNamespace/BPMChangeBeatmapEventData.hpp"
 #include "GlobalNamespace/BeatmapDataLoader_SpecialEventsFilter.hpp"
 #include "GlobalNamespace/BeatmapDataLoader_BpmTimeProcessor.hpp"
@@ -18,6 +17,7 @@
 #include "GlobalNamespace/BeatmapEventDataBox.hpp"
 #include "GlobalNamespace/LightColorBeatmapEventDataBox.hpp"
 #include "GlobalNamespace/LightRotationBeatmapEventDataBox.hpp"
+#include "GlobalNamespace/LightRotationBeatmapEventData.hpp"
 #include "GlobalNamespace/LightRotationBaseData.hpp"
 #include "GlobalNamespace/BeatmapEventDataBoxGroupLists.hpp"
 #include "GlobalNamespace/SpawnRotationBeatmapEventData.hpp"
@@ -287,14 +287,14 @@ namespace CustomJSONData {
         }
     }
 
-    constexpr LightRotationBeatmapEventData::Axis ConvertAxis(BeatmapSaveDataVersion3::BeatmapSaveData::Axis axis) {
+    constexpr LightAxis ConvertAxis(BeatmapSaveDataVersion3::BeatmapSaveData::Axis axis) {
         if (axis == BeatmapSaveDataVersion3::BeatmapSaveData::Axis::X) {
-            return LightRotationBeatmapEventData::Axis::X;
+            return LightAxis::X;
         }
         if (axis != BeatmapSaveDataVersion3::BeatmapSaveData::Axis::Y) {
-            return LightRotationBeatmapEventData::Axis::X;
+            return LightAxis::X;
         }
-        return LightRotationBeatmapEventData::Axis::Y;
+        return LightAxis::Y;
     }
 
     constexpr EaseType ConvertEaseType(BeatmapSaveDataVersion3::BeatmapSaveData::EaseType easeType) {
@@ -369,7 +369,7 @@ namespace CustomJSONData {
         constexpr To ProcessItem(From o, TArgs&... args) const {
             auto uKlass = o ? o->klass : classof(From);
             auto it = converters.find(uKlass);
-            if (it == converters.end()) {
+            if (it == converters.end()) { 
 //                for (auto const& [klass, func] : converters) {
 //                    if (il2cpp_functions::class_is_assignable_from(klass, uKlass)) {
 //                        return func(reinterpret_cast<T>(o));

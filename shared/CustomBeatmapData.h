@@ -12,7 +12,7 @@
 #include "GlobalNamespace/WaypointData.hpp"
 #include "GlobalNamespace/BasicBeatmapEventData.hpp"
 #include "GlobalNamespace/SliderData.hpp"
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
+#include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
 #include "GlobalNamespace/ISortedList_1.hpp"
 #include "System/Object.hpp"
 #include "System/Collections/IEnumerable.hpp"
@@ -50,8 +50,8 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapData, GlobalNamespace::Beatma
       }
 
       template<class T>
-      std::vector<T> GetBeatmapItemsCpp() {
-          auto* list = reinterpret_cast<GlobalNamespace::ISortedList_1<T>*>(beatmapDataItemsPerType->GetList(GetCustomType(classof(T))));
+      std::vector<T> GetBeatmapItemsCpp(int subtypeIdentifier = 0) {
+          auto* list = reinterpret_cast<GlobalNamespace::ISortedList_1<T>*>(beatmapDataItemsPerTypeAndId->GetList(GetCustomType(classof(T)), subtypeIdentifier));
 
           if (!list) return {};
 

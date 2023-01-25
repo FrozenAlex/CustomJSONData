@@ -1,6 +1,6 @@
 #include "CustomBeatmapData.h"
 
-#include "GlobalNamespace/BeatmapDataSortedListForTypes_1.hpp"
+#include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
 #include "GlobalNamespace/ISortedList_1.hpp"
 #include "GlobalNamespace/SortedList_2.hpp"
 #include "GlobalNamespace/BeatmapDataItem.hpp"
@@ -26,7 +26,7 @@ void CustomJSONData::CustomBeatmapData::ctor(int numberOfLines) {
 
     INVOKE_CTOR();
 
-    beatmapDataItemsPerType->items->Add(csTypeOf(CustomEventData*),
+    beatmapDataItemsPerTypeAndId->items->Add(csTypeOf(CustomEventData*),
                                         reinterpret_cast<ISortedList_1<BeatmapDataItem *> *>(SortedList_2<CustomEventData *, BeatmapDataItem *>::New_ctor(
                                                 nullptr)));
 }
@@ -57,7 +57,7 @@ System::Type *CustomJSONData::CustomBeatmapData::GetCustomType(Il2CppClass *obj)
 }
 
 void CustomJSONData::CustomBeatmapData::InsertCustomEventData(CustomJSONData::CustomEventData* customEventData) {
-    beatmapDataItemsPerType->InsertItem(customEventData);
+    beatmapDataItemsPerTypeAndId->InsertItem(customEventData);
     allBeatmapData->Insert(customEventData);
 }
 

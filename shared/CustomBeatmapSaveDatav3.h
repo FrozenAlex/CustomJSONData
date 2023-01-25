@@ -29,6 +29,7 @@
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_LightColorEventBox.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_LightRotationBaseData.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_LightRotationEventBox.hpp"
+#include "BeatmapSaveDataVersion3/BeatmapSaveData_LightTranslationEventBoxGroup.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_Axis.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_BasicEventTypesWithKeywords.hpp"
 #include "BeatmapSaveDataVersion3/BeatmapSaveData_BasicEventTypesWithKeywords_BasicEventTypesForKeyword.hpp"
@@ -88,6 +89,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData::v3, CustomBeatmapSaveData, BeatmapSaveData
                  ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::ColorBoostEventData*>* colorBoostBeatmapEvents,
                  ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightColorEventBoxGroup*>* lightColorEventBoxGroups,
                  ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightRotationEventBoxGroup*>* lightRotationEventBoxGroups,
+                 ::System::Collections::Generic::List_1<::BeatmapSaveDataVersion3::BeatmapSaveData::LightTranslationEventBoxGroup*>* lightTranslationEventBoxGroups,
                  ::BeatmapSaveDataVersion3::BeatmapSaveData::BasicEventTypesWithKeywords* basicEventTypesWithKeywords,
                  bool useNormalEventsAsCompatibleEvents);
 

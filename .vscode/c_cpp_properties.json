@@ -19,6 +19,7 @@
         "${ANDROID_NDK_HOME}/sources/cxx-stl/llvm-libc++abi/include"
       ],
       "compilerPath": "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
       "cStandard": "gnu17",
       "cppStandard": "gnu++20",
       "intelliSenseMode": "clang-x64"
