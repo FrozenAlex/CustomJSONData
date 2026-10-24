@@ -218,7 +218,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapSaveData_ConvertBeatmapSaveDataPreV2_5_0Inline,
 
     events.emplace_back(newEventData);
   }
-  auto list = ListW<BeatmapSaveDataVersion2_6_0AndEarlier::EventData*>(events);
+  auto list = CustomJSONData::SpanToSystemList(events);
 
   self->_events = list;
 }
