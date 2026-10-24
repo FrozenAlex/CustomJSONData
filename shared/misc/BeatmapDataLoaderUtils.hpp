@@ -450,7 +450,7 @@ struct CppConverter {
     requires(std::is_pointer_v<U> && std::is_convertible_v<U, From> &&
              std::is_convertible_v<F, std::function<To(U, TArgs...)>>)
   constexpr void AddConverter(F&& o) {
-    converters[classof(U)] = [o](From const& t, TArgs const&... args) constexpr {
+    converters[i2c::class_of<U>()] = [o](From const& t, TArgs const&... args) constexpr {
       return o(static_cast<U>(t), args...);
     };
   }
@@ -463,7 +463,7 @@ struct CppConverter {
     auto it = converters.find(uKlass);
     if (it == converters.end()) {
       //                for (auto const& [klass, func] : converters) {
-      //                    if (il2cpp_functions::class_is_assignable_from(klass, uKlass)) {
+      //                    if (i2c::functions::class_is_assignable_from(klass, uKlass)) {
       //                        return func(reinterpret_cast<T>(o));
       //                    }
       //                }
@@ -637,7 +637,7 @@ constexpr GlobalNamespace::IndexFilter* IndexFilterConvertor_Convert(BeatmapSave
     int num3 = num2 - param;
     if (num3 <= 0) {
       CJDLogger::Logger.fmtLog<LogLevel::ERR>("Error {}!", num3);
-      throw il2cpp_utils::exceptions::StackTraceException("ArgumentOutOfRangeException");
+      throw i2c::trace_exception("ArgumentOutOfRangeException");
     }
     int count = (param2 == 0) ? 1 : std::ceil((float)num3 / (float)param2);
     if (indexFilter->reversed) {
@@ -795,8 +795,8 @@ struct EventBoxGroupConvertor {
       return nullptr;
     }
 
-    if (auto dataForGroupUnity = il2cpp_utils::try_cast<UnityEngine::Object>(dataForGroup);
-        !dataForGroupUnity || (dataForGroupUnity.value()->m_CachedPtr.m_value == nullptr)) {
+    if (auto dataForGroupUnity = i2c::try_cast<UnityEngine::Object*>(dataForGroup);
+        !dataForGroupUnity || (dataForGroupUnity->m_CachedPtr.m_value == nullptr)) {
       return nullptr;
     }
 

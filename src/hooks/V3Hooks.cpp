@@ -32,9 +32,9 @@
 
 #include "System/String.hpp"
 
-#include "beatsaber-hook/shared/utils/typedefs-list.hpp"
-#include "beatsaber-hook/shared/utils/hooking.hpp"
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/listw.hpp"
+#include "beatsaber-hook/shared/hooking.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 // for rapidjson error parsing
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/error/en.h"
 
@@ -44,6 +44,7 @@
 
 #include "custom-types/shared/register.hpp"
 
+#include "System/String.hpp"
 #include "CustomBeatmapSaveDatav3.h"
 #include "CustomBeatmapData.h"
 #include "misc/BeatmapFieldUtils.hpp"
@@ -99,8 +100,8 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveDataJson_v3,
     environmentLightGroups = environmentInfo->environmentLightGroups;
   } else {
     environmentKeywords =
-        EnvironmentKeywords::New_ctor(ListW<StringW>({})->i___System__Collections__Generic__IReadOnlyList_1_T_());
-    environmentLightGroups = EnvironmentLightGroups::New_ctor(ListW<UnityW<LightGroupSO>>::New().getPtr())
+        EnvironmentKeywords::New_ctor(ListW<StringW>::New()->i___System__Collections__Generic__IReadOnlyList_1_T_());
+    environmentLightGroups = EnvironmentLightGroups::New_ctor(ListW<UnityW<LightGroupSO>>::New())
                                  ->i___GlobalNamespace__IEnvironmentLightGroups();
   }
 
@@ -245,12 +246,12 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveData_v3,
 
   CustomBeatmapData* beatmapData = CustomBeatmapData::New_ctor(4);
 
-  if (auto cBeatmapSaveData = il2cpp_utils::try_cast<v3::CustomBeatmapSaveData>(beatmapSaveData)) {
-    beatmapData->customData->Init(cBeatmapSaveData.value()->customData);
-    beatmapData->levelCustomData->Init(cBeatmapSaveData.value()->levelCustomData);
-    beatmapData->beatmapCustomData->Init(cBeatmapSaveData.value()->beatmapCustomData);
-    beatmapData->doc->doc = cBeatmapSaveData.value()->doc;
-    beatmapData->v2orEarlier = cBeatmapSaveData.value()->isV2;
+  if (auto cBeatmapSaveData = i2c::try_cast<v3::CustomBeatmapSaveData*>(beatmapSaveData)) {
+    beatmapData->customData->Init(cBeatmapSaveData->customData);
+    beatmapData->levelCustomData->Init(cBeatmapSaveData->levelCustomData);
+    beatmapData->beatmapCustomData->Init(cBeatmapSaveData->beatmapCustomData);
+    beatmapData->doc->doc = cBeatmapSaveData->doc;
+    beatmapData->v2orEarlier = cBeatmapSaveData->isV2;
   }
 
   CJDLogger::Logger.fmtLog<LogLevel::DBG>("Special events list {} {}",
@@ -400,7 +401,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveData_v3,
 
     // rotation
     CJDLogger::Logger.fmtLog<LogLevel::DBG>("rotation events {}",
-                                            il2cpp_utils::ClassStandardName(beatmapSaveData->rotationEvents->klass));
+                                            i2c::class_standard_name(beatmapSaveData->rotationEvents->klass));
     bpmTimeProcessor.Reset();
     bpmTimeProcessorIl2cpp->Reset();
     rotationTimeProcessor->Reset();
@@ -463,7 +464,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveData_v3,
       // not today though
       BeatmapDataLoaderVersion4::BeatmapDataLoader::LoadLightshow(beatmapData, defaultLightshowSaveData,
                                                                   bpmTimeProcessorIl2cpp, environmentKeywords,
-                                                                  environmentLightGroups, lightEventConverter);
+                                                                  environmentLightGroups, lightEventConverter, false, false);
     } else {
       DefaultEnvironmentEventsFactory::InsertDefaultEvents(beatmapData);
     }
@@ -525,13 +526,13 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveData_v3,
   CJDLogger::Logger.fmtLog<LogLevel::DBG>("Custom events");
   bpmTimeProcessor.Reset();
   bpmTimeProcessorIl2cpp->Reset();
-  if (auto customBeatmapSaveData = il2cpp_utils::try_cast<v3::CustomBeatmapSaveData>(beatmapSaveData)) {
-    if (customBeatmapSaveData.value()->customEventsData) {
-      std::stable_sort(customBeatmapSaveData.value()->customEventsData->begin(),
-                       customBeatmapSaveData.value()->customEventsData->end(),
+  if (auto customBeatmapSaveData = i2c::try_cast<v3::CustomBeatmapSaveData*>(beatmapSaveData)) {
+    if (customBeatmapSaveData->customEventsData) {
+      std::stable_sort(customBeatmapSaveData->customEventsData->begin(),
+                       customBeatmapSaveData->customEventsData->end(),
                        [](auto const& a, auto const& b) constexpr { return a.time < b.time; });
 
-      for (auto const& customEventSaveData : *customBeatmapSaveData.value()->customEventsData) {
+      for (auto const& customEventSaveData : *customBeatmapSaveData->customEventsData) {
 
         auto wrapper = CustomJSONData::JSONWrapperOrNull(customEventSaveData.data);
         beatmapData->InsertCustomEventData(
@@ -540,7 +541,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataLoader_GetBeatmapDataFromSaveData_v3,
       }
 
       CJDLogger::Logger.fmtLog<LogLevel::INF>("Added {} custom events",
-                                              customBeatmapSaveData.value()->customEventsData->size());
+                                              customBeatmapSaveData->customEventsData->size());
       profile.mark("Processed beatmap custom events");
     }
   }

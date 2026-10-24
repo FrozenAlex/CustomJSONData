@@ -36,9 +36,9 @@
 #include "System/Reflection/MemberInfo.hpp"
 #include "System/Collections/Generic/InsertionBehavior.hpp"
 
-#include "beatsaber-hook/shared/utils/typedefs-list.hpp"
-#include "beatsaber-hook/shared/utils/hooking.hpp"
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/listw.hpp"
+#include "beatsaber-hook/shared/hooking.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 // for rapidjson error parsing
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/error/en.h"
 
@@ -209,7 +209,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataStrobeFilterTransform_CreateTransformedData,
                       &BeatmapDataStrobeFilterTransform::CreateTransformedData, IReadonlyBeatmapData*,
                       IReadonlyBeatmapData* beatmapData,
                       EnvironmentIntensityReductionOptions* environmentIntensityReductionOptions) {
-  if (!beatmapData || reinterpret_cast<Il2CppObject*>(beatmapData)->klass != classof(CustomBeatmapData*)) {
+  if (!beatmapData || reinterpret_cast<Il2CppObject*>(beatmapData)->klass != i2c::class_of<CustomBeatmapData*>()) {
     return BeatmapDataStrobeFilterTransform_CreateTransformedData(beatmapData, environmentIntensityReductionOptions);
   }
   // Won't work since the constructors are base game
@@ -217,11 +217,11 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataStrobeFilterTransform_CreateTransformedData,
   //    auto fixedBeatmap = BeatmapDataStrobeFilterTransform_CreateTransformedData(beatmapData,
   //                                                                               environmentIntensityReductionOptions);
   //
-  //    auto customBeatmapData = il2cpp_utils::cast<CustomBeatmapData>(beatmapData);
+  //    auto customBeatmapData = i2c::cast<CustomBeatmapData*>(beatmapData);
   //    CustomBeatmapData *newBeatmap;
   //
-  ////    if (auto customBeatmapData = il2cpp_utils::try_cast<CustomBeatmapData>(beatmapData)) {
-  ////        for (auto const &c: customBeatmapData.value()->customEventDatas) {
+  ////    if (auto customBeatmapData = i2c::try_cast<CustomBeatmapData*>(beatmapData)) {
+  ////        for (auto const &c: customBeatmapData->customEventDatas) {
   ////            beatmapData2->InsertCustomEventDataInOrder(c);
   ////        }
   //        newBeatmap = customBeatmapData->GetFilteredCopyOverride(
@@ -246,10 +246,10 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataStrobeFilterTransform_CreateTransformedData,
   //            continue;
   //        }
   //
-  //        newBeatmap->InsertBeatmapEventDataInOrder(il2cpp_utils::cast<BeatmapEventData>(node->item));
+  //        newBeatmap->InsertBeatmapEventDataInOrder(i2c::cast<BeatmapEventData*>(node->item));
   //    }
 
-  auto* customBeatmapData = il2cpp_utils::cast<CustomBeatmapData>(beatmapData);
+  auto* customBeatmapData = i2c::cast<CustomBeatmapData*>(beatmapData);
   bool flag = environmentIntensityReductionOptions->compressExpand ==
               EnvironmentIntensityReductionOptions::CompressExpandReductionType::RemoveWithStrobeFilter;
   bool flag2 = environmentIntensityReductionOptions->rotateRings ==
@@ -276,9 +276,9 @@ MAKE_PAPER_HOOK_MATCH(BeatmapDataStrobeFilterTransform_CreateTransformedData,
     }
 
     BasicBeatmapEventData* basicBeatmapEventData =
-        il2cpp_utils::try_cast<BasicBeatmapEventData>(beatmapDataItem).value_or(nullptr);
+        i2c::try_cast<BasicBeatmapEventData*>(beatmapDataItem);
     LightColorBeatmapEventData* lightColorBeatmapEventData =
-        il2cpp_utils::try_cast<LightColorBeatmapEventData>(beatmapDataItem).value_or(nullptr);
+        i2c::try_cast<LightColorBeatmapEventData*>(beatmapDataItem);
 
     if (lightColorBeatmapEventData) {
       lightColorBeatmapEventData->DisableStrobe();
@@ -376,9 +376,9 @@ MAKE_PAPER_HOOK_MATCH(BeatmapCallbacksController_Dispose, &BeatmapCallbacksContr
 
 static float GetAheadTime(Il2CppObject const* obj, float aheadTimeOriginal) {
 
-  static auto const* CustomNoteKlass = classof(CustomJSONData::CustomNoteData*);
-  static auto const* CustomObstacleKlass = classof(CustomJSONData::CustomObstacleData*);
-  static auto const* CustomSliderKlass = classof(CustomJSONData::CustomSliderData*);
+  static auto const* CustomNoteKlass = i2c::class_of<CustomJSONData::CustomNoteData*>();
+  static auto const* CustomObstacleKlass = i2c::class_of<CustomJSONData::CustomObstacleData*>();
+  static auto const* CustomSliderKlass = i2c::class_of<CustomJSONData::CustomSliderData*>();
 
   float aheadTime = aheadTimeOriginal;
   if (obj->klass == CustomNoteKlass) {
@@ -588,7 +588,7 @@ MAKE_PAPER_HOOK_MATCH(InsertDefaultEvents, &DefaultEnvironmentEventsFactory::Ins
 
 void CustomJSONData::InstallHooks() {
 
-  il2cpp_functions::Class_Init(classof(BeatmapData*));
+  i2c::functions::Class_Init(i2c::class_of<BeatmapData*>());
   custom_types::Register::AutoRegister();
 
   // Stupid workaround because stupid NE

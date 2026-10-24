@@ -1,3 +1,4 @@
+#include "beatsaber-hook/shared/safeptr.hpp"
 #include <vector>
 #include <utility>
 #include "CustomEventData.h"
@@ -7,7 +8,7 @@
 
 #include "CustomJSONDataHooks.h"
 
-#include "beatsaber-hook/shared/utils/il2cpp-type-check.hpp"
+#include "beatsaber-hook/shared/types.hpp"
 
 #include "GlobalNamespace/CallbacksInTime.hpp"
 #include "GlobalNamespace/BeatmapCallbacksController.hpp"
@@ -23,7 +24,7 @@ DEFINE_TYPE(CustomJSONData, CustomEventData)
 DEFINE_TYPE(CustomJSONData, CustomBeatmapDataCallbackWrapper)
 
 CJD_MOD_EXPORT std::vector<CustomEventCallbackData> CustomEventCallbacks::customEventCallbacks;
-CJD_MOD_EXPORT SafePtr<System::Collections::Generic::LinkedListNode_1<GlobalNamespace::BeatmapDataItem*>>
+CJD_MOD_EXPORT safe_ptr<System::Collections::Generic::LinkedListNode_1<GlobalNamespace::BeatmapDataItem*>*>
     CustomEventCallbacks::firstNode;
 
 void CustomEventData::ctor(float time) {
@@ -50,14 +51,14 @@ CustomEventData* CustomEventData::GetCopy() {
 
 void CustomBeatmapDataCallbackWrapper::ctor() {
   INVOKE_CTOR();
-  reinterpret_cast<BeatmapDataCallbackWrapper*>(this)->_ctor(0.0F, csTypeOf(CustomEventData*),
+  reinterpret_cast<BeatmapDataCallbackWrapper*>(this)->_ctor(0.0F, i2c::cs_type_of<CustomEventData*>(),
                                                              ArrayW<int>((il2cpp_array_size_t)0));
 
   redirectEvent = nullptr;
 }
 
 void CustomBeatmapDataCallbackWrapper::CallCallback(BeatmapDataItem* item) {
-  static auto CustomEventDataKlass = classof(CustomEventData*);
+  static auto CustomEventDataKlass = i2c::class_of<CustomEventData*>();
   // CRASH_UNLESS(item->klass == CustomEventDataKlass);
 
 
@@ -73,13 +74,13 @@ void CustomBeatmapDataCallbackWrapper::CallCallback(BeatmapDataItem* item) {
 
   // should never get to this point
   if (item->klass != CustomEventDataKlass) {
-    CJDLogger::Logger.debug("Invokiong item {} time {}", il2cpp_utils::ClassStandardName(item->klass), item->time);
+    CJDLogger::Logger.debug("Invokiong item {} time {}", i2c::class_standard_name(item->klass), item->time);
     return;
   }
 
   PAPER_IL2CPP_CATCH_HANDLER(
       //
-      auto castedItem = il2cpp_utils::cast<CustomEventData>(item);
+      auto castedItem = i2c::cast<CustomEventData*>(item);
       for (auto const& customEvents : CustomEventCallbacks::customEventCallbacks) {
         try {
           customEvents.callback(controller, castedItem);

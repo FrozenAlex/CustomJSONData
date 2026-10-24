@@ -89,7 +89,7 @@ static void ConvertBeatmapSaveDataPreV2_5_0(CustomJSONData::v2::CustomBeatmapSav
   list->EnsureCapacity(size);
 
   for (auto* originalEventData : ListW<EventData*>(beatmapSaveData->events)) {
-    auto* eventData = il2cpp_utils::cast<CustomBeatmapSaveData_EventData>(originalEventData);
+    auto* eventData = i2c::cast<CustomBeatmapSaveData_EventData*>(originalEventData);
     CustomBeatmapSaveData_EventData* newData = nullptr;
 
     // Legacy BPM conversion here is deliberately ommited.
@@ -298,7 +298,7 @@ CustomJSONData::v2::CustomBeatmapSaveData::Deserialize(std::shared_ptr<rapidjson
 
       for (auto const& keyword_json : _keywords->value.GetArray()) {
         std::string keyword = keyword_json["_keyword"].GetString();
-        Il2CppString* keyword_il2cpp = il2cpp_utils::newcsstr(keyword);
+        StringW keyword_il2cpp(keyword);
 
         auto specialEventsArray = keyword_json["_specialEvents"].GetArray();
         auto specialEvents = VList<BeatmapSaveDataCommon::BeatmapEventType>::New(specialEventsArray.Size());
@@ -313,12 +313,12 @@ CustomJSONData::v2::CustomBeatmapSaveData::Deserialize(std::shared_ptr<rapidjson
         }
 
         specialEventsKeywordFiltersList.push_back(
-            CustomJSONData::NewFast<SpecialEventsForKeyword*>(keyword_il2cpp, specialEvents.getPtr()));
+            CustomJSONData::NewFast<SpecialEventsForKeyword*>(keyword_il2cpp, specialEvents));
       }
     }
   }
   auto* specialEventsKeywordFilters =
-      CustomJSONData::NewFast<SpecialEventKeywordFiltersData*>(specialEventsKeywordFiltersList.getPtr());
+      CustomJSONData::NewFast<SpecialEventKeywordFiltersData*>(specialEventsKeywordFiltersList);
 
   CJDLogger::Logger.fmtLog<LogLevel::DBG>("Parse root");
   auto* saveData = CRASH_UNLESS(

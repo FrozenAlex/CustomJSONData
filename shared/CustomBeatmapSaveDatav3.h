@@ -1,7 +1,8 @@
+#include "beatsaber-hook/shared/callback.hpp"
 #pragma once
 
 #include "custom-types/shared/macros.hpp"
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 
 #include "BeatmapSaveDataVersion3/ColorNoteData.hpp"
 #include "BeatmapSaveDataVersion3/BurstSliderData.hpp"
@@ -181,5 +182,5 @@ CustomBeatmapSaveData_ObstacleData* DeserializeObstacle(rapidjson::Value const& 
 CustomBeatmapSaveData_BombNoteData* DeserializeBombNote(rapidjson::Value const& val);
 CustomBeatmapSaveData_ColorNoteData* DeserializeColorNote(rapidjson::Value const& val);
 
-extern UnorderedEventCallback<v3::CustomBeatmapSaveData*> ParsedEvent;
+extern unordered_event_callback<v3::CustomBeatmapSaveData*> ParsedEvent;
 } // namespace CustomJSONData::v3::Parser

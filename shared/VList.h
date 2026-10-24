@@ -45,7 +45,7 @@
 
 namespace CustomJSONData {
 template <typename Ty>
-inline ListW<Ty, System::Collections::Generic::List_1<Ty>*> SpanToSystemList(std::span<Ty const> const span) {
+inline ListW<Ty> SpanToSystemList(std::span<Ty const> const span) {
   auto inner = System::Collections::Generic::List_1<Ty>::New_ctor(span.size());
   // update size field, otherwise will be "empty"
   inner->_size = span.size();
@@ -63,7 +63,7 @@ inline auto SpanToSystemList(std::vector<Ty> const& list) {
 } // namespace CustomJSONData
 
 template<typename T>
-using VList = ListW<T, System::Collections::Generic::List_1<T>*>;
+using VList = ListW<T>;
 
 // template <typename Ty>
 // class VList {
@@ -153,7 +153,7 @@ using VList = ListW<T, System::Collections::Generic::List_1<T>*>;
 
 // template <typename Ty> struct il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_class<VList<Ty>> {
 //   static inline Il2CppClass* get() {
-//     return classof(System::Collections::Generic::List_1<Ty>*);
+//     return i2c::class_of<System::Collections::Generic::List_1<Ty>*>();
 //   }
 // };
 

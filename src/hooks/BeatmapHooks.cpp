@@ -48,9 +48,9 @@
 #include "System/Reflection/MemberInfo.hpp"
 #include "System/Collections/Generic/InsertionBehavior.hpp"
 
-#include "beatsaber-hook/shared/utils/typedefs-list.hpp"
-#include "beatsaber-hook/shared/utils/hooking.hpp"
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/listw.hpp"
+#include "beatsaber-hook/shared/hooking.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 // for rapidjson error parsing
 #include "beatsaber-hook/shared/rapidjson/include/rapidjson/error/en.h"
 
@@ -88,8 +88,8 @@ using namespace CustomJSONData;
 using namespace BeatmapSaveDataVersion3;
 using namespace BeatmapSaveDataVersion4;
 
-MAKE_HOOK_FIND_INSTANCE(CustomBeatmapDataSortedListForTypes_InsertItem,
-                        classof(BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*), "InsertItem",
+MAKE_HOOK(CustomBeatmapDataSortedListForTypes_InsertItem,
+                        (i2c::class_of<BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*>(), "InsertItem", true),
                         System::Collections::Generic::LinkedListNode_1<BeatmapDataItem*>*,
                         BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
   auto* list = self->GetList(CustomBeatmapData::GetCustomType(item), item->get_subtypeGroupIdentifier());
@@ -101,18 +101,18 @@ MAKE_HOOK_FIND_INSTANCE(CustomBeatmapDataSortedListForTypes_InsertItem,
   return node;
 }
 
-MAKE_HOOK_FIND_INSTANCE(CustomBeatmapDataSortedListForTypes_RemoveItem,
-                        classof(BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*), "RemoveItem", void,
+MAKE_HOOK(CustomBeatmapDataSortedListForTypes_RemoveItem,
+                        (i2c::class_of<BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>*>(), "RemoveItem", true), void,
                         BeatmapDataSortedListForTypeAndIds_1<BeatmapDataItem*>* self, BeatmapDataItem* item) {
   auto* list = self->GetList(CustomBeatmapData::GetCustomType(item), item->get_subtypeGroupIdentifier());
   System::Collections::Generic::LinkedListNode_1<BeatmapDataItem*>* node = nullptr;
-  if (self->_itemToNodeMap->TryGetValue(item, byref(node))) {
+  if (self->_itemToNodeMap->TryGetValue(item, by_ref(node))) {
     list->Remove(node);
   }
 }
 
 MAKE_PAPER_HOOK_MATCH(BeatmapData_GetCopy, &CustomBeatmapData::GetCopy, BeatmapData*, BeatmapData* self) {
-  static auto* CustomBeatmapDataKlass = classof(CustomBeatmapData*);
+  static auto* CustomBeatmapDataKlass = i2c::class_of<CustomBeatmapData*>();
 
   if (self->klass == CustomBeatmapDataKlass) {
     return reinterpret_cast<CustomBeatmapData*>(self)->GetCopyOverride();
@@ -124,7 +124,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapData_GetCopy, &CustomBeatmapData::GetCopy, BeatmapD
 MAKE_PAPER_HOOK_MATCH(
     BeatmapData_GetFilteredCopy, &CustomBeatmapData::GetFilteredCopy, BeatmapData*, BeatmapData* self,
     System::Func_2<::GlobalNamespace::BeatmapDataItem*, ::GlobalNamespace::BeatmapDataItem*>* processDataItem) {
-  static auto* CustomBeatmapDataKlass = classof(CustomBeatmapData*);
+  static auto* CustomBeatmapDataKlass = i2c::class_of<CustomBeatmapData*>();
 
   if (self->klass == CustomBeatmapDataKlass) {
     return reinterpret_cast<CustomBeatmapData*>(self)->GetFilteredCopyOverride(
@@ -136,7 +136,7 @@ MAKE_PAPER_HOOK_MATCH(
 
 MAKE_PAPER_HOOK_MATCH(CustomAddBeatmapObjectData, &BeatmapData::AddBeatmapObjectData, void, BeatmapData* self,
                       BeatmapObjectData* item) {
-  if (auto customSelf = il2cpp_utils::try_cast<CustomBeatmapData>(self).value_or(nullptr)) {
+  if (auto customSelf = i2c::try_cast<CustomBeatmapData*>(self)) {
     customSelf->beatmapObjectDatas.emplace_back(item);
   }
   CustomAddBeatmapObjectData(self, item);
@@ -144,20 +144,20 @@ MAKE_PAPER_HOOK_MATCH(CustomAddBeatmapObjectData, &BeatmapData::AddBeatmapObject
 
 MAKE_PAPER_HOOK_MATCH(CustomInsertBeatmapEventData, &BeatmapData::InsertBeatmapEventData, void, BeatmapData* self,
                       BeatmapEventData* item) {
-  if (auto customSelf = il2cpp_utils::try_cast<CustomBeatmapData>(self).value_or(nullptr)) {
+  if (auto customSelf = i2c::try_cast<CustomBeatmapData*>(self)) {
     customSelf->beatmapEventDatas.emplace_back(item);
   }
   CustomInsertBeatmapEventData(self, item);
 }
 MAKE_PAPER_HOOK_MATCH(BurstSliderSpawner_ProcessSliderData, &BurstSliderSpawner::ProcessSliderData, void,
                       ::GlobalNamespace::SliderData* sliderData,
-                      ::ByRef<::GlobalNamespace::SliderSpawnData> sliderSpawnData, bool forceIsFirstNote,
+                      ::by_ref<::GlobalNamespace::SliderSpawnData const> sliderSpawnData, bool forceIsFirstNote,
                       ::GlobalNamespace::VariableMovementDataProvider* variableMovementDataProvider,
                       ::GlobalNamespace::BurstSliderSpawner_ProcessNoteDataDelegate* processNoteData) {
 
-  static auto CustomKlass = classof(CustomJSONData::CustomSliderData*);
+  static auto CustomKlass = i2c::class_of<CustomJSONData::CustomSliderData*>();
 
-  auto* customSliderData = il2cpp_utils::try_cast<CustomJSONData::CustomSliderData>(sliderData).value_or(nullptr);
+  auto* customSliderData = i2c::try_cast<CustomJSONData::CustomSliderData*>(sliderData);
   if (customSliderData == nullptr) {
     return BurstSliderSpawner_ProcessSliderData(sliderData, sliderSpawnData, forceIsFirstNote,
                                                 variableMovementDataProvider, processNoteData);

@@ -30,8 +30,8 @@ void CustomJSONData::CustomBeatmapData::ctor(int numberOfLines) {
   this->levelCustomData = CustomJSONData::JSONWrapperUTF16::New_ctor();
   this->doc = CustomJSONData::DocumentWrapper::New_ctor();
 
-  ____beatmapDataItemsPerTypeAndId->_sortedListsDataProcessors->Add(csTypeOf(CustomEventData*), nullptr);
-  // _beatmapDataItemsPerTypeAndId->_items->Add(csTypeOf(CustomEventData*),
+  ____beatmapDataItemsPerTypeAndId->_sortedListsDataProcessors->Add(i2c::cs_type_of<CustomEventData*>(), nullptr);
+  // _beatmapDataItemsPerTypeAndId->_items->Add(i2c::cs_type_of<CustomEventData*>(),
   //                                            reinterpret_cast<ISortedList_1<BeatmapDataItem*>*>(
   //                                                SortedList_2<CustomEventData*,
   //                                                BeatmapDataItem*>::New_ctor(nullptr)));
@@ -81,7 +81,7 @@ System::Type* CustomJSONData::CustomBeatmapData::GetCustomType(Il2CppObject* obj
 }
 
 System::Type* CustomJSONData::CustomBeatmapData::GetCustomType(Il2CppClass* obj) {
-  static auto* CustomKlass = classof(CustomEventData*);
+  static auto* CustomKlass = i2c::class_of<CustomEventData*>();
 
   if (obj == nullptr) {
     return nullptr;
@@ -94,17 +94,17 @@ System::Type* CustomJSONData::CustomBeatmapData::GetCustomType(Il2CppClass* obj)
   if (typePtr == nullptr) {
     CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>(
         "Checking if {} is equal to ref {} for obj {} vs ref {}", obj->namespaze, CustomKlass->namespaze,
-        il2cpp_utils::ClassStandardName(obj), il2cpp_utils::ClassStandardName(CustomKlass));
+        i2c::class_standard_name(obj), i2c::class_standard_name(CustomKlass));
     if (std::string_view(obj->namespaze) == std::string_view(CustomKlass->namespaze) && obj != CustomKlass) {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("They are custom, using parent type {}",
-                                                     il2cpp_utils::ClassStandardName(obj->parent));
+                                                     i2c::class_standard_name(obj->parent));
 
-      typePtr = il2cpp_utils::GetSystemType(obj->parent);
+      typePtr = i2c::get_system_type(obj->parent);
     } else {
       CJDLogger::Logger.fmtLog<Paper::LogLevel::INF>("They are not custom (basegame), using self type {}",
-                                                     il2cpp_utils::ClassStandardName(obj));
+                                                     i2c::class_standard_name(obj));
 
-      typePtr = il2cpp_utils::GetSystemType(obj);
+      typePtr = i2c::get_system_type(obj);
     }
   }
 

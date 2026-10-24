@@ -1,29 +1,27 @@
 #pragma once
 
+#include "beatsaber-hook/shared/safeptr.hpp"
+
 #include "JSONWrapper.h"
 #include "_config.hpp"
 
 #include "custom-types/shared/macros.hpp"
 
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 
 #include "GlobalNamespace/BeatmapDataItem.hpp"
 #include "GlobalNamespace/BeatmapDataCallbackWrapper.hpp"
 #include "GlobalNamespace/zzzz__BeatmapCallbacksController_def.hpp"
+#include "System/Collections/Generic/LinkedListNode_1.hpp"
 
 
 #include "LowLevelUtils.hpp"
-
-namespace System::Collections::Generic {
-template <class T>
-class LinkedListNode_1;
-} // namespace System::Collections::Generic
 
 namespace GlobalNamespace {
 class BeatmapCallbacksController;
 }
 
-#define FindMethodGetter(methodName) ::il2cpp_utils::il2cpp_type_check::MetadataGetter<methodName>::methodInfo()
+#define FindMethodGetter(methodName) ::i2c::metadata_getter<methodName>::method_info()
 
 DECLARE_CLASS_CODEGEN(CustomJSONData, CustomEventData, GlobalNamespace::BeatmapDataItem) {
 
@@ -33,7 +31,7 @@ private:
 public:
   static CustomEventData* New(float time, std::string_view type, size_t typeHash, JSONWrapper* customData);
 
-  DECLARE_OVERRIDE_METHOD(CustomEventData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomEventData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
 public:
   std::string_view type;
@@ -86,7 +84,7 @@ class CJD_MOD_EXPORT CustomEventCallbacks {
 public:
   static std::vector<CustomEventCallbackData> customEventCallbacks;
   // For Noodle
-  static SafePtr<System::Collections::Generic::LinkedListNode_1<GlobalNamespace::BeatmapDataItem*>> firstNode;
+  static safe_ptr<System::Collections::Generic::LinkedListNode_1<GlobalNamespace::BeatmapDataItem*>*> firstNode;
 
   static void AddCustomEventCallback(void (*callback)(GlobalNamespace::BeatmapCallbacksController* callbackController,
                                                       CustomJSONData::CustomEventData*));

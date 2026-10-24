@@ -1,5 +1,8 @@
 #pragma once
-#include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
+#include "beatsaber-hook/shared/members.hpp"
+#include "beatsaber-hook/shared/listw.hpp"
+#include "beatsaber-hook/shared/safeptr.hpp"
+#include "beatsaber-hook/shared/callback.hpp"
 
 #include "scotland2/shared/loader.hpp"
 
@@ -18,46 +21,18 @@ public:
       Paper::ConstLoggerContext("CustomJSONData"); // Paper::Logger::WithContext<"CustomJSONData", false>();
 };
 
-// Implements a try-catch handler which will first attempt to run the provided body.
-// If there is an uncaught RunMethodException, it will first attempt to log the backtrace.
-// If it holds a valid C# exception, it will attempt to raise it, such that it is caught in the il2cpp domain.
-// If an exception is thrown that is otherwise what-able is caught, it will attempt to call the what() method
-// and then rethrow the exception to the il2cpp domain.
-// If an unknown exception is caught, it will terminate explicitly, as opposed to letting it be thrown across the il2cpp
-// domain. All logs that occur as a result of this function will be under the core beatsaber-hook global logger.
-#define PAPER_IL2CPP_CATCH_HANDLER(...)                                                                                \
-  try {                                                                                                                \
-    __VA_ARGS__                                                                                                        \
-  } catch (::il2cpp_utils::RunMethodException const& exc) {                                                            \
-    CJDLogger::Logger.fmtLog<LogLevel::ERR>("Uncaught RunMethodException! what(): {}", exc.what());                    \
-    Paper::Logger::WaitForFlush();                                                                                     \
-    CJDLogger::Logger.error("Uncaught RunMethodException! what(): {}", exc.what());                                    \
-    exc.log_backtrace();                                                                                               \
-    CJDLogger::Logger.Backtrace(100);                                                                                  \
-    if (exc.ex) {                                                                                                      \
-      exc.rethrow();                                                                                                   \
-    }                                                                                                                  \
-    SAFE_ABORT();                                                                                                      \
-  } catch (::il2cpp_utils::exceptions::StackTraceException const& exc) {                                               \
-    CJDLogger::Logger.error("Uncaught StackTraceException! what(): {}", exc.what());                                   \
-    CJDLogger::Logger.fmtLog<LogLevel::ERR>("Uncaught StackTraceException! what(): {}", exc.what());                   \
-    exc.log_backtrace();                                                                                               \
-    CJDLogger::Logger.Backtrace(100);                                                                                  \
-    SAFE_ABORT();                                                                                                      \
-  } catch (::std::exception const& exc) {                                                                              \
-    CJDLogger::Logger.error("Uncaught C++ exception! type name: {}, what(): {}", typeid(exc).name(), exc.what());      \
-    CJDLogger::Logger.fmtLog<LogLevel::ERR>("Uncaught C++ exception! type name: {}, what(): {}", typeid(exc).name(),   \
-                                            exc.what());                                                               \
-    Paper::Logger::WaitForFlush();                                                                                     \
-    CJDLogger::Logger.Backtrace(100);                                                                                  \
-    ::il2cpp_utils::raise(exc);                                                                                        \
-  } catch (...) {                                                                                                      \
-    CJDLogger::Logger.fmtLog<LogLevel::ERR>(                                                                           \
-        "Uncaught, unknown C++ exception (not std::exception) with no known what() method!");                          \
-    Paper::Logger::WaitForFlush();                                                                                     \
-    CJDLogger::Logger.error("Uncaught, unknown C++ exception (not std::exception) with no known what() method!");      \
-    CJDLogger::Logger.Backtrace(100);                                                                                  \
-    SAFE_ABORT();                                                                                                      \
+// Keep native exceptions from crossing the IL2CPP hook boundary.
+#define PAPER_IL2CPP_CATCH_HANDLER(...) \
+  try { __VA_ARGS__ } catch (std::exception const& exc) { \
+    CJDLogger::Logger.error("Uncaught native exception: {}", exc.what()); \
+    CJDLogger::Logger.Backtrace(100); \
+    Paper::Logger::WaitForFlush(); \
+    SAFE_ABORT(); \
+  } catch (...) { \
+    CJDLogger::Logger.error("Uncaught unknown native exception"); \
+    CJDLogger::Logger.Backtrace(100); \
+    Paper::Logger::WaitForFlush(); \
+    SAFE_ABORT(); \
   }
 
 template <auto Func, class T>
@@ -71,48 +46,21 @@ template <auto Func, class R, class... TArgs> struct PaperHookCatchWrapper<Func,
   }
 };
 
-// Make a hook that uses the provided method pointer in a match an ensures the signature matches.
-// This should be your go-to hook macro when hooking anything that has a codegen equivalent.
-// Also includes a catch handler.
-#define MAKE_PAPER_HOOK_MATCH(name_, mPtr, retval, ...)                                                                \
-  struct Hook_##name_ {                                                                                                \
-    using funcType = retval (*)(__VA_ARGS__);                                                                          \
-    static_assert(std::is_same_v<funcType, ::Hooking::InternalMethodCheck<decltype(mPtr)>::funcType>,                  \
-                  "Hook method signature does not match!");                                                            \
-    constexpr static char const* name() {                                                                              \
-      return #name_;                                                                                                   \
-    }                                                                                                                  \
-    static MethodInfo const* getInfo() {                                                                               \
-      return ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo();                                    \
-    }                                                                                                                  \
-    static funcType* trampoline() {                                                                                    \
-      return &name_;                                                                                                   \
-    }                                                                                                                  \
-    static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                              \
-    static funcType hook() {                                                                                           \
-      return &::PaperHookCatchWrapper<&hook_##name_, funcType>::wrapper;                                               \
-    }                                                                                                                  \
-    static retval hook_##name_(__VA_ARGS__);                                                                           \
-  };                                                                                                                   \
-  retval Hook_##name_::hook_##name_(__VA_ARGS__)
-
-// Same as MAKE_PAPER_HOOK_MATCH, but for manual MethodInfo* usage.
-#define MAKE_PAPER_HOOK_FIND(name_, infoGet, retval, ...)                                                              \
-  struct Hook_##name_ {                                                                                                \
-    using funcType = retval (*)(__VA_ARGS__);                                                                          \
-    constexpr static char const* name() {                                                                              \
-      return #name_;                                                                                                   \
-    }                                                                                                                  \
-    static MethodInfo const* getInfo() {                                                                               \
-      return infoGet;                                                                                                  \
-    }                                                                                                                  \
-    static funcType* trampoline() {                                                                                    \
-      return &name_;                                                                                                   \
-    }                                                                                                                  \
-    static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                              \
-    static funcType hook() {                                                                                           \
-      return &::PaperHookCatchWrapper<&hook_##name_, funcType>::wrapper;                                               \
-    }                                                                                                                  \
-    static retval hook_##name_(__VA_ARGS__);                                                                           \
-  };                                                                                                                   \
-  retval Hook_##name_::hook_##name_(__VA_ARGS__)
+// Hook layout follows beatsaber-hook 9, with the logging boundary retained.
+#define MAKE_PAPER_HOOK_MATCH(name_, method, retval, ...) \
+  struct BS_HOOK_HIDDEN hook_##name_ { \
+    static constexpr auto cast_test = []<typename T>() { return requires { static_cast<T>(method); }; }; \
+    using func_t = retval (*)(__VA_ARGS__); \
+    using cast_t = ::i2c::detail::method_check<cast_test, func_t>::type; \
+    static_assert(cast_test.operator()<cast_t>(), "Hook method signature does not match!"); \
+    static_assert(::i2c::detail::match_hookable<static_cast<cast_t>(method)>); \
+    static constexpr char const* name() { return #name_; } \
+    static auto addr() { return ::i2c::metadata_getter<static_cast<cast_t>(method)>::method_info(); } \
+    static func_t hook() { return &::PaperHookCatchWrapper<&hook_m_##name_, func_t>::wrapper; } \
+    static func_t* trampoline() { return &name_; } \
+    static inline flamingo::HookHandle install_handle; \
+    static inline flamingo::HookPriority install_priority; \
+    static inline func_t name_ = nullptr; \
+    static retval hook_m_##name_(__VA_ARGS__); \
+  }; \
+  retval hook_##name_::hook_m_##name_(__VA_ARGS__)

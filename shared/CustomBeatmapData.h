@@ -69,16 +69,16 @@ public:
 
       if (!beatmapDataItem) continue;
 
-      if (auto event = il2cpp_utils::try_cast<GlobalNamespace::BeatmapEventData>(beatmapDataItem)) {
-        copy->InsertBeatmapEventDataInOrder(*event);
+      if (auto event = i2c::try_cast<GlobalNamespace::BeatmapEventData*>(beatmapDataItem)) {
+        copy->InsertBeatmapEventDataInOrder(event);
       }
 
-      if (auto object = il2cpp_utils::try_cast<GlobalNamespace::BeatmapObjectData>(beatmapDataItem)) {
-        copy->AddBeatmapObjectDataInOrder(*object);
+      if (auto object = i2c::try_cast<GlobalNamespace::BeatmapObjectData*>(beatmapDataItem)) {
+        copy->AddBeatmapObjectDataInOrder(object);
       }
 
-      if (auto customEvent = il2cpp_utils::try_cast<CustomEventData>(beatmapDataItem)) {
-        copy->InsertCustomEventDataInOrder(*customEvent);
+      if (auto customEvent = i2c::try_cast<CustomEventData*>(beatmapDataItem)) {
+        copy->InsertCustomEventDataInOrder(customEvent);
       }
     }
 
@@ -95,7 +95,7 @@ public:
 
   template <class T> std::vector<T> GetBeatmapItemsCpp(GlobalNamespace::BeatmapDataItem::BeatmapDataItemType type) {
     auto* list = reinterpret_cast<GlobalNamespace::ISortedList_1<T>*>(
-        _beatmapDataItemsPerTypeAndId->GetList(GetCustomType(classof(T)), type.value__));
+        _beatmapDataItemsPerTypeAndId->GetList(GetCustomType(i2c::class_of<T>()), type.value__));
 
     if (!list) return {};
 
@@ -150,7 +150,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomBeatmapEventData, GlobalNamespace::B
   DECLARE_FASTER_CTOR(ctor, float time,
                       ::GlobalNamespace::BasicBeatmapEventType basicBeatmapEventType, int value, float floatValue);
 
-  DECLARE_OVERRIDE_METHOD(CustomBeatmapEventData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomBeatmapEventData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
   // optional
   DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper*, customData);
@@ -160,7 +160,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomObstacleData, GlobalNamespace::Obsta
   DECLARE_FASTER_CTOR(ctor, float time, float endBeat, float beat, int rotation, int lineIndex,
                       ::GlobalNamespace::NoteLineLayer lineLayer, float duration, int width, int height);
 
-  DECLARE_OVERRIDE_METHOD(CustomObstacleData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomObstacleData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
   // optional
   DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper*, customData);
@@ -178,7 +178,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomNoteData, GlobalNamespace::NoteData)
       ::GlobalNamespace::NoteCutDirection cutDirection, float timeToNextColorNote, float timeToPrevColorNote,
       int flipLineIndex, float flipYSide, float cutDirectionAngleOffset, float cutSfxVolumeMultiplier);
 
-  DECLARE_OVERRIDE_METHOD(CustomNoteData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomNoteData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
   // optional
   DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper*, customData);
@@ -200,7 +200,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomSliderData, GlobalNamespace::SliderD
                       ::GlobalNamespace::NoteCutDirection tailCutDirection, float tailCutDirectionAngleOffset,
                       ::GlobalNamespace::SliderMidAnchorMode midAnchorMode, int sliceCount, float squishAmount);
 
-  DECLARE_OVERRIDE_METHOD(CustomSliderData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomSliderData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
   // optional
   DECLARE_INSTANCE_FIELD(CustomJSONData::JSONWrapper*, customData);
@@ -214,7 +214,7 @@ DECLARE_CLASS_CODEGEN(CustomJSONData, CustomWaypointData, GlobalNamespace::Waypo
   DECLARE_FASTER_CTOR(ctor, float time, float beat, int rotation, int lineIndex,
                       ::GlobalNamespace::NoteLineLayer lineLayer, ::GlobalNamespace::OffsetDirection offsetDirection);
 
-  DECLARE_OVERRIDE_METHOD(CustomWaypointData*, GetCopy, il2cpp_utils::FindMethod("", "BeatmapDataItem", "GetCopy"));
+  DECLARE_OVERRIDE_METHOD(CustomWaypointData*, GetCopy, i2c::find_method({"", "BeatmapDataItem"}, "GetCopy"));
 
   // Used for Noodle Extensions
   DECLARE_INSTANCE_FIELD(float, bpm);

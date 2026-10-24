@@ -18,8 +18,8 @@ project(${COMPILE_ID})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # c++ standard
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED 20)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # define that stores the actual source directory
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -36,8 +36,6 @@ add_compile_definitions(MOD_ID=\"${MOD_ID}\")
 RECURSE_FILES(cpp_file_list ${SOURCE_DIR}/*.cpp)
 RECURSE_FILES(c_file_list ${SOURCE_DIR}/*.c)
 
-RECURSE_FILES(inline_hook_c ${EXTERN_DIR}/includes/beatsaber-hook/shared/inline-hook/*.c)
-RECURSE_FILES(inline_hook_cpp ${EXTERN_DIR}/includes/beatsaber-hook/shared/inline-hook/*.cpp)
 
 # add all src files to compile
 add_library(
@@ -45,8 +43,6 @@ add_library(
         SHARED
         ${cpp_file_list}
         ${c_file_list}
-        ${inline_hook_c}
-        ${inline_hook_cpp}
 )
 
 target_include_directories(${COMPILE_ID} PRIVATE .)

@@ -12,7 +12,7 @@
 #define RAPIDJSON_NEON
 #endif
 
-#include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
+#include "beatsaber-hook/shared/rapidjson.hpp"
 #include "CJDLogger.h"
 
 namespace NEJSON {
