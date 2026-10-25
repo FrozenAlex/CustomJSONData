@@ -13,6 +13,7 @@
 #endif
 
 #include "beatsaber-hook/shared/rapidjson.hpp"
+#include "beatsaber-hook/shared/gc-alloc.hpp"
 #include "CJDLogger.h"
 
 namespace NEJSON {
@@ -181,8 +182,12 @@ static std::optional<std::reference_wrapper<rapidjson::Value const>> ReadOptiona
   return std::nullopt;
 }
 
+template <typename T>
+using ParsedArray = std::vector<T, std::conditional_t<i2c::type_check::ref_type<T>,
+    i2c::gc_allocator<T>, std::allocator<T>>>;
+
 template <typename T, typename F>
-static std::optional<std::vector<T>> ReadOptionalArray(rapidjson::Value const& object, std::string_view const key,
+static std::optional<ParsedArray<T>> ReadOptionalArray(rapidjson::Value const& object, std::string_view const key,
                                                        F&& func) {
   auto itr = object.FindMember(key.data());
   if (itr == object.MemberEnd()) {
@@ -191,7 +196,7 @@ static std::optional<std::vector<T>> ReadOptionalArray(rapidjson::Value const& o
 
   auto jsonArray = itr->value.GetArray();
 
-  std::vector<T> vec;
+  ParsedArray<T> vec;
   vec.reserve(jsonArray.Size());
 
   for (auto const& v : jsonArray) {
@@ -202,14 +207,14 @@ static std::optional<std::vector<T>> ReadOptionalArray(rapidjson::Value const& o
 }
 
 template <typename T, typename F>
-static inline std::vector<T> ReadArrayOrEmpty(rapidjson::Value const& object, std::string_view const key, F&& func) {
+static inline ParsedArray<T> ReadArrayOrEmpty(rapidjson::Value const& object, std::string_view const key, F&& func) {
   auto opt = ReadOptionalArray<T, F>(object, key, std::forward<F>(func));
 
   if (!opt) {
     return {};
   }
 
-  return *opt;
+  return std::move(*opt);
 }
 
 template <typename T>

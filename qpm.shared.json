@@ -7,7 +7,7 @@
     "info": {
       "name": "CustomJSONData",
       "id": "custom-json-data",
-      "version": "0.24.5",
+      "version": "0.24.6",
       "url": "https://github.com/StackDoubleFlow/CustomJSONData",
       "additionalData": {
         "overrideSoName": "libcustom-json-data.so",
@@ -48,7 +48,7 @@
     "dependencies": [
       {
         "id": "beatsaber-hook",
-        "versionRange": "^9.3.0",
+        "versionRange": "^9.4.1",
         "additionalData": {}
       },
       {
@@ -242,13 +242,13 @@
     {
       "dependency": {
         "id": "beatsaber-hook",
-        "versionRange": "=9.3.0",
+        "versionRange": "=9.4.1",
         "additionalData": {
-          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.3.0/libbeatsaber-hook.so",
-          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.3.0/debug_libbeatsaber-hook.so",
+          "soLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.4.1/libbeatsaber-hook.so",
+          "debugSoLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.4.1/debug_libbeatsaber-hook.so",
           "overrideSoName": "libbeatsaber-hook.so",
-          "modLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.3.0/beatsaber-hook.qmod",
-          "branchName": "version/v9_3_0",
+          "modLink": "https://github.com/QuestPackageManager/beatsaber-hook/releases/download/v9.4.1/beatsaber-hook.qmod",
+          "branchName": "version/v9_4_1",
           "compileOptions": {
             "cppFlags": [
               "-Wno-extra-qualification"
@@ -257,7 +257,7 @@
           "cmake": true
         }
       },
-      "version": "9.3.0"
+      "version": "9.4.1"
     },
     {
       "dependency": {

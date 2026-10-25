@@ -48,6 +48,7 @@
 #include "CustomJSONDataHooks.h"
 #include "CJDLogger.h"
 #include "VList.h"
+#include "JsonUtils.h"
 #include "paper2_scotland2/shared/Profiler.hpp"
 
 using namespace System;
@@ -195,7 +196,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapSaveData_ConvertBeatmapSaveDataPreV2_5_0Inline,
                       void, BeatmapSaveDataVersion2_6_0AndEarlier::BeatmapSaveData* self) {
   CJDLogger::Logger.info("Using CJD 2.5.0 fixup");
 
-  std::vector<BeatmapSaveDataVersion2_6_0AndEarlier::EventData*> events;
+  NEJSON::ParsedArray<BeatmapSaveDataVersion2_6_0AndEarlier::EventData*> events;
   events.reserve(self->events->_size);
 
   for (auto const& originalEventData : VList<BeatmapSaveDataVersion2_6_0AndEarlier::EventData*>(self->events)) {
@@ -218,7 +219,7 @@ MAKE_PAPER_HOOK_MATCH(BeatmapSaveData_ConvertBeatmapSaveDataPreV2_5_0Inline,
 
     events.emplace_back(newEventData);
   }
-  auto list = CustomJSONData::SpanToSystemList(events);
+  auto list = SpanToSystemList(events);
 
   self->_events = list;
 }

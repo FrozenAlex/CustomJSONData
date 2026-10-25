@@ -46,18 +46,11 @@
 namespace CustomJSONData {
 template <typename Ty>
 inline ListW<Ty> SpanToSystemList(std::span<Ty const> const span) {
-  auto inner = System::Collections::Generic::List_1<Ty>::New_ctor(span.size());
-  // update size field, otherwise will be "empty"
-  inner->_size = span.size();
-
-  std::copy(span.begin(), span.end(), inner->_items.begin());
-
-
-  return {inner};
+  return ListW<Ty>(span);
 }
 
-template <typename Ty>
-inline auto SpanToSystemList(std::vector<Ty> const& list) {
+template <typename Ty, typename Allocator>
+inline auto SpanToSystemList(std::vector<Ty, Allocator> const& list) {
   return SpanToSystemList<Ty>(std::span<Ty const>(list));
 }
 } // namespace CustomJSONData
